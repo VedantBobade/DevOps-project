@@ -15,21 +15,32 @@ pipeline {
 
         stage('Set Up Python and Install Dependencies') {
             steps {
-                sh 'python3 -m venv venv'
-                sh 'source venv/bin/activate && pip install -r requirements.txt'
+                script {
+                    if (isUnix()) {
+                        sh 'python3 -m venv venv'
+                        sh 'source venv/bin/activate && pip install -r requirements.txt'
+                    } else {
+                        bat 'python -m venv venv'
+                        bat '.\\venv\\Scripts\\activate && pip install -r requirements.txt'
+                    }
+                }
             }
         }
 
         stage('Run Tests') {
             steps {
-                // Run tests using the Python unittest module
-                sh 'source venv/bin/activate && python -m unittest discover -s tests'
+                script {
+                    if (isUnix()) {
+                        sh 'source venv/bin/activate && python -m unittest discover -s tests'
+                    } else {
+                        bat '.\\venv\\Scripts\\activate && python -m unittest discover -s tests'
+                    }
+                }
             }
         }
 
         stage('Build Docker Image') {
             steps {
-                // Build Docker image
                 sh 'docker build -t flask-app .'
             }
         }
